@@ -14,6 +14,7 @@ i{font-style:italic}
 svg{position:absolute;left:0;top:0}
 </style></head><body><div id="p"><svg id="s" width="1080" height="1350"></svg></div>
 <script>
+(async()=>{await Promise.all([document.fonts.load('64px EB'),document.fonts.load('italic 64px EB'),document.fonts.load('18px GM')]);
 const Q=new URLSearchParams(location.search), DIR=Q.get('d')||'A', PG=+(Q.get('p')||1);
 const L='#FFFAF0', B='#8FB8F2', M=96, W=1080, H=1350;
 const spark=(x,y,r)=>{const k=r*0.14;return `<path d="M${x} ${y-r}Q${x+k} ${y-k} ${x+r} ${y}Q${x+k} ${y+k} ${x} ${y+r}Q${x-k} ${y+k} ${x-r} ${y}Q${x-k} ${y-k} ${x} ${y-r}Z" fill="${B}"/>`};
@@ -38,14 +39,15 @@ const F={
 };
 // ---------- story (same in every direction) ----------
 const S=[
- {label:'Waning moon · 3–8 Nov', title:'Everything|is <i>energy.</i>', sub:'Even a stone.|Even your intention.', form:'vibration', note:'5 crystals for letting go', end:'Swipe →', cover:1},
- {label:'01 · The stone', title:'Press a quartz|and it answers|with a tiny|<i>electric charge.</i>', sub:'This is piezoelectricity:|how quartz keeps time|in your watch, beating|32,768 times a second.', form:'wave', end:'Curie & Curie, 1880', marks:['still','pressed']},
- {label:'02 · The intention', title:'Your brain is|2% of your body,|and uses 20%|of its <i>energy.</i>', sub:'Every thought,|every intention you hold,|runs on that energy.', form:'mind', end:'Raichle & Gusnard, PNAS, 2002'},
- {label:'03 · Together', title:'Press the stone|as you name|your intention.|It becomes a <i>cue</i>|you return to.', sub:'In 94 studies, people|who tied a clear intention|to a cue were far more|likely to follow through.', form:'together', marks:['stone','intention'], end:'Gollwitzer & Sheeran, 2006'},
- {label:'04 · Five for the waning moon', title:'What each|one is <i>for.</i>', sub:'Each stone holds|a different intention.|Notice which name|stays with you.', grid:[['grounding','Smoky quartz','for grounding'],['ties','Obsidian','for old ties'],['calm','Amethyst','for a calm mind'],['clean','Selenite','for a clean slate'],['bounds','Black tourmaline','for boundaries']], end:'Share with a friend'},
- {label:'05 · How to hold it', title:'Hold it.|Name what|you release.|<i>Breathe out.</i>', sub:'Then let it rest|on your altar until|the new moon,|on 9 November.', form:'steps', marks3:['hold','name','breathe out'], end:'Share with a friend'},
+ {label:'Waning moon · 3–8 Nov', title:'Everything|is <i>energy.</i>', sub:'Even a stone.|Even your intention.', side:'Even a stone. Even your intention.|Five crystals to hold this waning moon.', form:'vibration', note:'5 crystals for letting go', end:'Swipe →', cover:1},
+ {label:'01 · The stone', title:'Press a quartz,|and it answers with a tiny|<i>electric charge.</i>', sub:'It’s called piezoelectricity.|It’s how quartz keeps time in your watch:|32,768 beats a second.', form:'wave', end:'Curie & Curie, 1880', marks:['still','pressed']},
+ {label:'02 · The intention', title:'Your brain is 2%|of your body, and uses|20% of its <i>energy.</i>', sub:'Every thought, every intention you hold,|runs on that energy.', form:'mind', end:'Raichle & Gusnard, PNAS, 2002'},
+ {label:'03 · Together', title:'Press the stone|as you name your intention.|It becomes a <i>cue</i>|you return to.', sub:'In 94 studies, intentions tied to a cue|were far more likely to be kept.', form:'together', marks:['stone','intention'], end:'Gollwitzer & Sheeran, 2006'},
+ {label:'04 · Five for the waning moon', title:'What each one is <i>for.</i>', sub:'Each stone holds a different intention.|Notice which name stays with you.', grid:[['grounding','Smoky quartz','for grounding'],['ties','Obsidian','for old ties'],['calm','Amethyst','for a calm mind'],['clean','Selenite','for a clean slate'],['bounds','Black tourmaline','for boundaries']], end:'Share with a friend'},
+ {label:'05 · How to hold it', title:'Hold it.|Name what you release.|<i>Breathe out.</i>', sub:'Then let it rest on your altar|until the new moon on 9 November.', form:'steps', marks3:['hold','name','breathe out'], end:'Share with a friend'},
  {final:1, title:'Which one is|<i>calling you?</i>', sub:'Trust the first stone your eye went to.', cta:'Save this for your altar.'},
 ];
+const measure=(html,style)=>{const d=document.createElement('div');d.className='eb';d.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;'+style;d.innerHTML=html;document.body.appendChild(d);const r=[d.offsetWidth,d.offsetHeight];d.remove();return r};
 const P=S[PG-1]; let svg='', html='', art_='', CEN=null;
 const div=(st,cls,txt,id='')=>html+=`<div ${id?`id="${id}"`:''} class="a ${cls} ln" style="${st}">${String(txt).split('|').join('<br>')}</div>`;
 function marks(x0,x1,y){ if(P.form==='together'){return} if(P.marks){art_+=T(x0,y,P.marks[0].toUpperCase(),{a:'start',s:18})+T(x1,y,P.marks[1].toUpperCase(),{a:'end',s:18})} }
@@ -56,7 +58,7 @@ function grid(cx,cy,w,h,rr){ // 3 + 2 layout; whole block is centred later by me
 }
 function steps(cx,y,r){ art_+=F.steps(cx,y,r); P.marks3.forEach((m,i)=>art_+=T(cx+(i-1)*r*2,y+r*0.9*0.5+52,`0${i+1} · ${m.toUpperCase()}`,{s:18}))}
 function art(x,y,r,box){ if(P.grid) return grid(box.cx,box.cy,box.w,box.h,box.r); if(P.form==='steps') return steps(x,y,r);
-  art_+=F[P.form](x,y,r); if(P.form==='wave') marks(x-r*2.2,x+r*2.2,y+r*0.32+70); if(P.form==='together') art_+=T(x-r*0.55,y+r*0.88+56,'STONE',{s:18})+T(x+r*0.55,y+r*0.88+56,'INTENTION',{s:18}); }
+  art_+=F[P.form](x,y,r); if(P.form==='wave') marks(x-r*2.2,x+r*2.2,y+r*0.32+70); if(P.form==='together') art_+=T(x-r*0.55-30,y+r*0.88+50,'STONE',{s:18})+T(x+r*0.55+30,y+r*0.88+50,'INTENTION',{s:18}); }
 // ---------- final page: a different room, so it reads as the end ----------
 if(P.final){ document.getElementById('p').style.background='#3D374E';
  div(`top:0;bottom:250px;left:120px;right:120px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center`,'',
@@ -77,16 +79,32 @@ if(DIR==='A'&&!P.final){ // EMBLEM: everything centred; form above, words below
    `<div class="eb" style="font-size:${big}px;line-height:1.06">${P.title.split('|').join('<br>')}</div>`+(P.sub?`<div class="eb" style="font-size:${P.cover?40:32}px;line-height:1.38;opacity:.72">${P.cover?'<i>'+P.sub.split('|').join('<br>')+'</i>':P.sub.split('|').join('<br>')}</div>`:''));}
  div(`top:1230px;left:${M}px`,'gm d','Lune'); div(`top:1230px;right:${M}px`,'gm d',P.cover?P.note+' →':P.end);
 }
-if(DIR==='B'&&!P.final){ // GRID: thin frame; title cell + note cell; art lives in the big cell
- const x0=M,x1=W-M,y0=120,y1=1180,ym=P.cover?470:500,xm=W/2;
- svg+=`<rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" fill="none" stroke="${L}" stroke-width="1" opacity=".26"/><line x1="${x0}" y1="${ym}" x2="${x1}" y2="${ym}" stroke="${L}" stroke-width="1" opacity=".26"/><line x1="${xm}" y1="${y0}" x2="${xm}" y2="${ym}" stroke="${L}" stroke-width="1" opacity=".26"/>`;
- div(`top:${y0+40}px;left:${x0+40}px`,'gm d',P.label,'bl');
- const big=P.cover?86:48;
- div(`top:${y0+92}px;left:${x0+40}px;width:${xm-x0-80}px;font-size:${big}px;line-height:1.08`,'eb',P.title,'bt'); window.CELL={y0,ym};
- const right=P.cover?'Even a stone.|Even your intention.||5 crystals to hold|as you let go|this waning moon.':(P.sub||'');
- div(`top:${y0+44}px;left:${xm+40}px;width:${x1-xm-80}px;font-size:28px;line-height:1.4;opacity:.8`,'eb',right,'bn');
- CEN=[540,(ym+y1)/2]; if(P.grid) art(0,0,0,{cx:540,cy:(ym+y1)/2-6,w:840,h:600,r:63}); else art(540,(ym+y1)/2,P.form==='wave'?175:(P.form==='steps'?120:150));
- div(`top:1220px;left:${M}px`,'gm d','Lune'); div(`top:1220px;right:${M}px`,'gm d',P.cover?'Swipe →':P.end);
+if(DIR==='B'&&!P.final){ // GRID v2: fixed eyebrow row, title row, then art + note side by side. One padding everywhere.
+ const PAD=48, PT=64, x0=M, x1=W-M, xm=W/2, y0=110, yE=y0+92, y1=1220;
+ const tsize=P.cover?124:72, nsize=38;
+ const TT=P.title.split('|').join('<br>'), NN=(P.cover?P.side:P.sub).split('|').join('<br>');
+ const th=measure(TT,`font-size:${tsize}px;line-height:1.05`)[1], nh=measure(NN,`font-size:${nsize}px;line-height:1.38`)[1];
+ const yA=yE+2*PT+th;
+ const ln=(xa,ya,xb,yb)=>svg+=`<line x1="${xa}" y1="${ya}" x2="${xb}" y2="${yb}" stroke="${L}" stroke-width="1" opacity=".26"/>`;
+ svg+=`<rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" fill="none" stroke="${L}" stroke-width="1" opacity=".26"/>`;
+ ln(x0,yE,x1,yE); ln(x0,yA,x1,yA);
+ // row 1: eyebrow, always the same place
+ div(`top:${y0}px;height:${yE-y0}px;left:${x0+PAD}px;display:flex;align-items:center`,'gm d',P.label);
+ div(`top:${y0}px;height:${yE-y0}px;right:${W-x1+PAD}px;display:flex;align-items:center`,'gm d','Lune');
+ if(false){
+ } else { // row 2: title ; row 3: note (both full width, hug their text) ; row 4: art fills the rest
+  const yN=yA+2*PT+nh;
+  ln(x0,yN,x1,yN);
+  div(`top:${yE}px;height:${yA-yE}px;left:${x0+PAD}px;width:${x1-x0-2*PAD}px;display:flex;align-items:center`,'eb',`<div style="font-size:${tsize}px;line-height:1.05">${TT}</div>`);
+  div(`top:${yA}px;height:${yN-yA}px;left:${x0+PAD}px;width:${x1-x0-2*PAD}px;display:flex;align-items:center`,'eb',`<div style="font-size:${nsize}px;line-height:1.38;opacity:.82">${NN}</div>`,'note');
+  const cx=540, cy=(yN+y1)/2; CEN=[cx,cy]; const room=y1-yN-2*PAD;
+  if(P.grid){ art(0,0,0,{cx:0,cy:0,w:800,h:0,r:Math.min(54,(room-280)/4)}); }
+  else if(P.form==='steps'){ const r=Math.min(52,room*0.22); const lab=['01 · HOLD','02 · NAME','03 · BREATHE OUT'];
+   [(a,b,c)=>dot(a,b,c*0.2)+E(a,b,c,c,.8),(a,b,c)=>E(a,b,c,c,.8)+E(a,b,c*0.64,c,.5),(a,b,c)=>E(a,b,c,c,.5)+E(a,b,c,c,.9,0,'2 6')].forEach((f,i)=>{const x=(i-1)*260;art_+=f(x,0,r)+T(x,r+48,lab[i],{s:18})});
+  } else { const k={wave:0.36,together:0.5,vibration:0.62,mind:0.5,hold:0.5,orbit:0.5}[P.form]; const lim={wave:150,together:Math.min(170,(room-80)/1.8),vibration:Math.min(200,room/1.45),mind:Math.min(150,room/2),hold:150,orbit:150}[P.form]; art(0,0,Math.min(room*k,lim)); }
+ }
+ div(`top:${y1+34}px;left:${x0}px`,'gm d',P.cover?'5 crystals for letting go':P.end);
+ div(`top:${y1+34}px;right:${W-x1}px`,'gm d',P.cover?'Swipe →':'Swipe →');
 }
 if(DIR==='C'&&!P.final){ // EDITORIAL: big left title on top, small art low right, quiet notes low left
  div(`top:${M}px;left:${M}px`,'gm d',P.label);
@@ -102,8 +120,9 @@ if(DIR==='C'&&!P.final){ // EDITORIAL: big left title on top, small art low righ
 document.getElementById('s').innerHTML=svg+`<g id="art">${art_}</g>`;
 if(CEN){const g=document.getElementById('art');const b=g.getBBox();if(b.width){g.setAttribute('transform',`translate(${(CEN[0]-(b.x+b.width/2)).toFixed(1)} ${(CEN[1]-(b.y+b.height/2)).toFixed(1)})`)}} document.getElementById('p').insertAdjacentHTML('beforeend',html);
 document.querySelectorAll('.ln').forEach(el=>{const w=el.style.width?parseFloat(el.style.width):null; if(!w)return; let fs=parseFloat(getComputedStyle(el).fontSize); while(el.scrollWidth>w+1&&fs>20){fs-=1;el.style.fontSize=fs+'px'}});
-if(window.CELL){const l=document.getElementById('bl'),t=document.getElementById('bt'),n=document.getElementById('bn');
+if(false&&window.CELL){const l=document.getElementById('bl'),t=document.getElementById('bt'),n=document.getElementById('bn');
  const gap=28, lh=l.offsetHeight, th=t.offsetHeight, blk=lh+gap+th, top=(CELL.y0+CELL.ym)/2-blk/2+(+(Q.get('dy')||0));
  l.style.top=top+'px'; t.style.top=(top+lh+gap)+'px'; if(n){n.style.top=(top+lh+gap+ (n.offsetHeight<th? 0:0))+'px'; const nb=top+lh+gap+n.offsetHeight; if(n.offsetHeight>th){}}}
 
+window.READY=1;})();
 </script></body></html>
