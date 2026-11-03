@@ -43,7 +43,7 @@ const S=[
  {label:'03 · Together', title:'Press the stone as you name your intention. It becomes a <i>cue</i> your mind returns to.', sub:'In 94 studies, people who tied a clear intention to a cue were far more likely to follow through.', form:'together', marks:['stone','intention'], end:'Gollwitzer & Sheeran, 2006'},
  {label:'04 · Five for the waning moon', title:'What each one is <i>for.</i>', sub:'Each stone holds a different intention. Notice which name stays with you.', grid:[['grounding','Smoky quartz','for grounding'],['ties','Obsidian','for old ties'],['calm','Amethyst','for a calm mind'],['clean','Selenite','for a clean slate'],['bounds','Black tourmaline','for boundaries']], end:'Share with a friend'},
  {label:'05 · How to hold it', title:'Hold it. Name what you release. <i>Breathe out.</i>', sub:'Then let it rest on your altar until the new moon on 9 November.', form:'steps', marks3:['hold','name','breathe out'], end:'Share with a friend'},
- {final:1, title:'Which one is <i>calling you?</i>', sub:'Trust the first stone your eye went to. Save this for your altar.'},
+ {final:1, title:'Which one is <i>calling you?</i>', sub:'Trust the first stone your eye went to.', cta:'Save this for your altar.'},
 ];
 const P=S[PG-1]; let svg='', html='', art_='', CEN=null;
 const div=(st,cls,txt,id='')=>html+=`<div ${id?`id="${id}"`:''} class="a ${cls}" style="${st}">${txt}</div>`;
@@ -58,9 +58,13 @@ function art(x,y,r,box){ if(P.grid) return grid(box.cx,box.cy,box.w,box.h,box.r)
   art_+=F[P.form](x,y,r); if(P.form==='wave') marks(x-r*2.2,x+r*2.2,y+r*0.32+70); if(P.form==='together') art_+=T(x-r*0.55,y+r*0.88+56,'STONE',{s:18})+T(x+r*0.55,y+r*0.88+56,'INTENTION',{s:18}); }
 // ---------- final page: a different room, so it reads as the end ----------
 if(P.final){ document.getElementById('p').style.background='#3D374E';
- div(`top:0;bottom:0;left:120px;right:120px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:40px`,'',
-  `<div class="eb" style="font-size:104px;line-height:1.04">${P.title}</div><div class="eb" style="font-size:40px;line-height:1.35;opacity:.8">${P.sub}</div>`);
- div(`bottom:96px;left:0;right:0;text-align:center`,'gm','<span style="font-size:22px;letter-spacing:.4em">LUNE</span><br><span style="opacity:.6">lunerituals.app</span>');
+ div(`top:0;bottom:250px;left:120px;right:120px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center`,'',
+  `<div class="eb" style="font-size:104px;line-height:1.04">${P.title}</div>`+
+  `<div class="eb" style="margin-top:44px;font-size:40px;line-height:1.35;opacity:.8">${P.sub}</div>`+
+  `<div class="eb" style="margin-top:20px;font-size:40px;line-height:1.35"><i>${P.cta}</i></div>`);
+ div(`bottom:96px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:22px`,'',
+  `<img src="lune-logo-white.svg" alt="Lune" style="width:150px;height:auto;display:block">`+
+  `<span class="gm" style="opacity:.6">lunerituals.app</span>`);
 }
 // ---------- three layout logics ----------
 if(DIR==='A'&&!P.final){ // EMBLEM: everything centred; form above, words below
