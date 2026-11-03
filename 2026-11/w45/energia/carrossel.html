@@ -30,29 +30,32 @@ const F={
  calm:(x,y,r)=>{let s='';for(let i=1;i<=5;i++)s+=E(x,y,r*0.2*i,r*0.2*i,.95-i*0.14);return s},
  clean:(x,y,r)=>E(x,y,r*0.8,r*0.8,.9)+spark(x,y-r*0.8,r*0.09),
  bounds:(x,y,r)=>E(x,y,r*0.95,r*0.95,.85)+E(x,y,r*0.78,r*0.78,.5,0,'3 6')+dot(x,y,r*0.06,.9),
+ mind:(x,y,r)=>E(x,y,r*0.95,r*0.95,.3)+E(x,y,r*0.95,r*0.42,.85,0)+E(x,y,r*0.42,r*0.95,.55,0)+spark(x+r*0.95,y,r*0.08),
+ together:(x,y,r)=>{let s='';for(let i=1;i<=4;i++){s+=E(x-r*0.55,y,r*0.22*i,r*0.22*i,.95-i*0.17)+E(x+r*0.55,y,r*0.22*i,r*0.22*i,.95-i*0.17)}return s+spark(x,y,r*0.08)},
  orbit:(x,y,r)=>E(x,y,r,r,.25,0,'2 8')+E(x,y,r*0.95,r*0.34,.85,-25)+E(x,y,r*0.95,r*0.34,.85,35)+E(x,y,r*0.95,r*0.34,.55,90)+spark(x,y,r*0.07),
- steps:(x,y,r)=>{let s='';const xs=[x-r*1.5,x,x+r*1.5];const fs=[F.hold,F.ties,F.calm];xs.forEach((cx,i)=>{s+=[(a,b,c)=>dot(a,b,c*0.1)+E(a,b,c*0.5,c*0.5,.8),(a,b,c)=>E(a,b,c*0.5,c*0.5,.8)+E(a,b,c*0.32,c*0.5,.5),(a,b,c)=>E(a,b,c*0.5,c*0.5,.5)+E(a,b,c*0.5,c*0.5,.9,0,'2 6')][i](cx,y,r*0.9)});return s},
+ steps:(x,y,r)=>{let s='';const xs=[x-r*2,x,x+r*2];const fs=[F.hold,F.ties,F.calm];xs.forEach((cx,i)=>{s+=[(a,b,c)=>dot(a,b,c*0.1)+E(a,b,c*0.5,c*0.5,.8),(a,b,c)=>E(a,b,c*0.5,c*0.5,.8)+E(a,b,c*0.32,c*0.5,.5),(a,b,c)=>E(a,b,c*0.5,c*0.5,.5)+E(a,b,c*0.5,c*0.5,.9,0,'2 6')][i](cx,y,r*0.9)});return s},
 };
 // ---------- story (same in every direction) ----------
 const S=[
- {label:'Waning moon · 3–8 Nov', title:'Everything<br>is <i>energy.</i>', sub:'Even a stone.', form:'vibration', note:'5 crystals for letting go', end:'Swipe →', cover:1},
- {label:'01 · A stone is alive', title:'Press a quartz crystal and it answers with a tiny <i>electric charge.</i>', sub:'It’s called piezoelectricity. It’s how quartz keeps time in your watch, vibrating 32,768 times a second.', form:'wave', end:'Curie & Curie, 1880', marks:['still','pressed']},
- {label:'02 · Why hold one', title:'A stone doesn’t do the work. It holds the <i>intention</i> you give it.', sub:'Each time you see it, you remember what you chose to let go.', form:'hold', end:'Share with a friend'},
- {label:'03 · Five for the waning moon', title:'What each one is <i>for.</i>', grid:[['grounding','Smoky quartz','for grounding'],['ties','Obsidian','for old ties'],['calm','Amethyst','for a calm mind'],['clean','Selenite','for a clean slate'],['bounds','Black tourmaline','for boundaries']], end:'Share with a friend'},
- {label:'04 · How to hold it', title:'Hold it. Name what you release. <i>Breathe out.</i>', sub:'Then let it rest on your altar until the new moon on 9 November.', form:'steps', marks3:['hold','name','breathe out'], end:'Share with a friend'},
- {label:'05 · Choose one', title:'Which one is <i>calling you?</i>', sub:'Trust the first stone your eye went to. Save this for your altar.', form:'orbit', end:'More moon rituals · lunerituals.app'},
+ {label:'Waning moon · 3–8 Nov', title:'Everything<br>is <i>energy.</i>', sub:'Even a stone. Even your intention.', form:'vibration', note:'5 crystals for letting go', end:'Swipe →', cover:1},
+ {label:'01 · The stone', title:'Press a quartz crystal and it answers with a tiny <i>electric charge.</i>', sub:'It’s called piezoelectricity. It’s how quartz keeps time in your watch, vibrating 32,768 times a second.', form:'wave', end:'Curie & Curie, 1880', marks:['still','pressed']},
+ {label:'02 · The intention', title:'Your brain is 2% of your body, and uses 20% of its <i>energy.</i>', sub:'Every thought, every intention you hold, runs on that energy.', form:'mind', end:'Raichle & Gusnard, PNAS, 2002'},
+ {label:'03 · Together', title:'Press the stone as you name your intention. It becomes a <i>cue</i> your mind returns to.', sub:'In 94 studies, people who tied a clear intention to a cue were far more likely to follow through.', form:'together', marks:['stone','intention'], end:'Gollwitzer & Sheeran, 2006'},
+ {label:'04 · Five for the waning moon', title:'What each one is <i>for.</i>', grid:[['grounding','Smoky quartz','for grounding'],['ties','Obsidian','for old ties'],['calm','Amethyst','for a calm mind'],['clean','Selenite','for a clean slate'],['bounds','Black tourmaline','for boundaries']], end:'Share with a friend'},
+ {label:'05 · How to hold it', title:'Hold it. Name what you release. <i>Breathe out.</i>', sub:'Then let it rest on your altar until the new moon on 9 November.', form:'steps', marks3:['hold','name','breathe out'], end:'Share with a friend'},
+ {label:'06 · Choose one', title:'Which one is <i>calling you?</i>', sub:'Trust the first stone your eye went to. Save this for your altar.', form:'orbit', end:'More moon rituals · lunerituals.app'},
 ];
 const P=S[PG-1]; let svg='', html='';
 const div=(st,cls,txt)=>html+=`<div class="a ${cls}" style="${st}">${txt}</div>`;
-function marks(x0,x1,y){ if(P.marks){svg+=T(x0,y,P.marks[0].toUpperCase(),{a:'start',s:18})+T(x1,y,P.marks[1].toUpperCase(),{a:'end',s:18})} }
+function marks(x0,x1,y){ if(P.form==='together'){return} if(P.marks){svg+=T(x0,y,P.marks[0].toUpperCase(),{a:'start',s:18})+T(x1,y,P.marks[1].toUpperCase(),{a:'end',s:18})} }
 function grid(cx,cy,w,h){ // 3 + 2 layout, labels below each form with clear gap
  const g=P.grid, r=Math.min(w/3,h/2)*0.27, rows=[[0,1,2],[3,4]];
  rows.forEach((row,ri)=>{const y=cy-h/4+ri*h/2-20; row.forEach((k,ci)=>{const n=row.length;const x=cx+(ci-(n-1)/2)*(w/3);
    svg+=F[g[k][0]](x,y,r); svg+=T(x,y+r+50,g[k][1].toUpperCase(),{op:.6,s:18})+T(x,y+r+92,g[k][2],{f:'EB',s:34,i:1,op:.9});})});
 }
-function steps(cx,y,r){ svg+=F.steps(cx,y,r); P.marks3.forEach((m,i)=>svg+=T(cx+(i-1)*r*1.5,y+r*0.9*0.5+52,`0${i+1} · ${m.toUpperCase()}`,{s:18}))}
+function steps(cx,y,r){ svg+=F.steps(cx,y,r); P.marks3.forEach((m,i)=>svg+=T(cx+(i-1)*r*2,y+r*0.9*0.5+52,`0${i+1} · ${m.toUpperCase()}`,{s:18}))}
 function art(x,y,r,box){ if(P.grid) return grid(box.cx,box.cy,box.w,box.h); if(P.form==='steps') return steps(x,y,r);
-  svg+=F[P.form](x,y,r); if(P.form==='wave') marks(x-r*2.2,x+r*2.2,y+r*0.32+70); }
+  svg+=F[P.form](x,y,r); if(P.form==='wave') marks(x-r*2.2,x+r*2.2,y+r*0.32+70); if(P.form==='together') svg+=T(x-r*0.55,y+r*0.88+56,'STONE',{s:18})+T(x+r*0.55,y+r*0.88+56,'INTENTION',{s:18}); }
 // ---------- three layout logics ----------
 if(DIR==='A'){ // EMBLEM: everything centred; form above, words below
  div(`top:${M}px;left:0;right:0;text-align:center`,'gm d',P.label);
