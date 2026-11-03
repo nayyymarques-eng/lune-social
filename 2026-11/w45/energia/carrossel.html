@@ -23,7 +23,14 @@ const dot=(x,y,r,op=1)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${L}" opacit
 const T=(x,y,t,o={})=>`<text x="${x}" y="${y}" text-anchor="${o.a||'middle'}" font-family="${o.f||'GM'}" font-size="${o.s||16}" ${o.f?'':'letter-spacing="1.8"'} ${o.i?'font-style="italic"':''} fill="${L}" opacity="${o.op??.55}">${t}</text>`;
 // ---------- forms: each drawn centred at (x,y) within radius r ----------
 const F={
- vibration:(x,y,r)=>{let s='';for(let i=0;i<7;i++)s+=E(x-r*0.62+i*r*0.21,y,r*0.42,r*0.7,.3+i*0.09);return s+spark(x,y,r*0.07)},
+ vibration:(x,y,r)=>{let s='';for(let i=0;i<7;i++)s+=E(x-r*0.62+i*r*0.21,y,r*0.42,r*0.7,.22+i*0.06);
+   const m=r*0.26; s+=`<circle cx="${x}" cy="${y}" r="${m}" fill="none" stroke="${L}" stroke-width="1" opacity=".35" stroke-dasharray="2 5"/>`;
+   s+=`<path d="M${x} ${y-m} A${m} ${m} 0 0 0 ${x} ${y+m} A${m*0.55} ${m} 0 0 1 ${x} ${y-m}Z" fill="${L}" opacity=".92"/>`; return s},
+ wane:(x,y,r)=>{let s='';const fr=[.34,.2,.1,.04,0],gap=r*4.2;fr.forEach((f,i)=>{const cx=x+(i-2)*gap;
+   if(f>0){s+=`<circle cx="${cx}" cy="${y}" r="${r}" fill="none" stroke="${L}" stroke-width="1" opacity=".22"/>`;
+     s+=`<path d="M${cx} ${y-r} A${r} ${r} 0 0 0 ${cx} ${y+r} A${r*(1-2*f)} ${r} 0 0 1 ${cx} ${y-r}Z" fill="${L}" opacity=".92"/>`;}
+   else s+=`<circle cx="${cx}" cy="${y}" r="${r}" fill="none" stroke="${L}" stroke-width="1.4" opacity=".95"/>`;});
+   s+=T(x-2*gap-r,y+r+52,'TONIGHT',{s:18,a:'start'})+T(x+2*gap+r,y+r+52,'NEW MOON · 9 NOV',{s:18,op:.9,a:'end'});return s},
  wave:(x,y,r)=>{const x0=x-r*2.2,x1=x+r*2.2;let d='';for(let i=0;i<=900;i++){const u=i/900;const a=r*0.32*(1-0.5*u);const ph=2*Math.PI*(1.5*u+Math.pow(u,3.4)*9);d+=(i?'L':'M')+(x0+(x1-x0)*u).toFixed(1)+' '+(y-a*Math.sin(ph)).toFixed(1)}
    return `<path d="${d}" fill="none" stroke="${L}" stroke-width="1.1" opacity=".85"/>`},
  hold:(x,y,r)=>E(x,y,r,r,.25,0,'2 8')+E(x,y,r*0.62,r*0.62,.55)+E(x,y,r*0.26,r*0.26,.9)+spark(x,y,r*0.08),
@@ -39,7 +46,7 @@ const F={
 };
 // ---------- story (same in every direction) ----------
 const S=[
- {label:'Waning moon · 3–8 Nov', title:'Everything|is <i>energy.</i>', sub:'Even a stone.|Even your intention.', side:'Even a stone. Even your intention.|Five crystals to hold this waning moon.', form:'vibration', note:'5 crystals for letting go', end:'Swipe →', cover:1},
+ {label:'Waning moon · 3–8 Nov', title:'Everything|is <i>energy.</i>', sub:'Even a stone.|Even your intention.', side:'Even a stone. Even your intention.|Five crystals to hold as the moon wanes,|until <i>the new moon on 9 November.</i>', form:'wane', note:'5 crystals for letting go', end:'Swipe →', cover:1},
  {label:'01 · The stone', title:'Press a quartz,|and it answers with a tiny|<i>electric charge.</i>', sub:'It’s called piezoelectricity.|It’s how quartz keeps time in your watch:|32,768 beats a second.', form:'wave', end:'Curie & Curie, 1880', marks:['still','pressed']},
  {label:'02 · The intention', title:'Your brain is 2%|of your body, and uses|20% of its <i>energy.</i>', sub:'Every thought, every intention you hold,|runs on that energy.', form:'mind', end:'Raichle & Gusnard, PNAS, 2002'},
  {label:'03 · Together', title:'Press the stone|as you name your intention.|It becomes a <i>cue</i>|you return to.', sub:'In 94 studies, intentions tied to a cue|were far more likely to be kept.', form:'together', marks:['stone','intention'], end:'Gollwitzer & Sheeran, 2006'},
@@ -62,6 +69,8 @@ function art(x,y,r,box){ if(P.grid) return grid(box.cx,box.cy,box.w,box.h,box.r)
 // ---------- final page: a different room, so it reads as the end ----------
 if(P.final){ document.getElementById('p').style.background='#3D374E';
  div(`top:0;bottom:250px;left:120px;right:120px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center`,'',
+  `<div style="width:56px;height:56px;border-radius:50%;border:1.5px solid rgba(255,250,240,.7);margin-bottom:24px"></div>`+
+  `<div class="gm" style="opacity:.65;margin-bottom:40px">New moon · 9 Nov</div>`+
   `<div class="eb" style="font-size:104px;line-height:1.04">${P.title.split('|').join('<br>')}</div>`+
   `<div class="eb" style="margin-top:44px;font-size:40px;line-height:1.35;opacity:.8">${P.sub}</div>`+
   `<div class="eb" style="margin-top:20px;font-size:40px;line-height:1.35"><i>${P.cta}</i></div>`);
@@ -96,12 +105,12 @@ if(DIR==='B'&&!P.final){ // GRID v2: fixed eyebrow row, title row, then art + no
   const yN=yA+2*PT+nh;
   ln(x0,yN,x1,yN);
   div(`top:${yE}px;height:${yA-yE}px;left:${x0+PAD}px;width:${x1-x0-2*PAD}px;display:flex;align-items:center`,'eb',`<div style="font-size:${tsize}px;line-height:1.05">${TT}</div>`);
-  div(`top:${yA}px;height:${yN-yA}px;left:${x0+PAD}px;width:${x1-x0-2*PAD}px;display:flex;align-items:center`,'eb',`<div style="font-size:${nsize}px;line-height:1.38;opacity:.82">${NN}</div>`,'note');
+  div(`top:${yA}px;height:${yN-yA}px;left:${x0+PAD}px;width:${x1-x0-2*PAD}px;display:flex;align-items:center`,'eb',`<div style="font-size:${nsize}px;line-height:1.38;color:rgba(255,250,240,.82)">${NN.replace(/<i>/g,'<i style="color:#FFFAF0">')}</div>`,'note');
   const cx=540, cy=(yN+y1)/2; CEN=[cx,cy]; const room=y1-yN-2*PAD;
   if(P.grid){ art(0,0,0,{cx:0,cy:0,w:800,h:0,r:Math.min(54,(room-280)/4)}); }
   else if(P.form==='steps'){ const r=Math.min(52,room*0.22); const lab=['01 · HOLD','02 · NAME','03 · BREATHE OUT'];
    [(a,b,c)=>dot(a,b,c*0.2)+E(a,b,c,c,.8),(a,b,c)=>E(a,b,c,c,.8)+E(a,b,c*0.64,c,.5),(a,b,c)=>E(a,b,c,c,.5)+E(a,b,c,c,.9,0,'2 6')].forEach((f,i)=>{const x=(i-1)*260;art_+=f(x,0,r)+T(x,r+48,lab[i],{s:18})});
-  } else { const k={wave:0.36,together:0.5,vibration:0.62,mind:0.5,hold:0.5,orbit:0.5}[P.form]; const lim={wave:150,together:Math.min(170,(room-80)/1.8),vibration:Math.min(200,room/1.45),mind:Math.min(150,room/2),hold:150,orbit:150}[P.form]; art(0,0,Math.min(room*k,lim)); }
+  } else { const k={wave:0.36,together:0.5,vibration:0.62,wane:0.12,mind:0.5,hold:0.5,orbit:0.5}[P.form]; const lim={wave:150,together:Math.min(170,(room-80)/1.8),vibration:Math.min(200,room/1.45),wane:40,mind:Math.min(150,room/2),hold:150,orbit:150}[P.form]; art(0,0,Math.min(room*k,lim)); }
  }
  div(`top:${y1+34}px;left:${x0}px`,'gm d',P.cover?'5 crystals for letting go':P.end);
  div(`top:${y1+34}px;right:${W-x1}px`,'gm d',P.cover?'Swipe →':'Swipe →');
