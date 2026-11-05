@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:G;src:url(Geist-Regular.ttf)}@font-face{font-family:G;font-weight:600;src:url(Geist-Medium.ttf)}
+@font-face{font-family:M;src:url(GeistMono-Regular.ttf)}
+@font-face{font-family:E;src:url(eb-garamond-latin-400-normal.woff2)}@font-face{font-family:E;font-style:italic;src:url(eb-garamond-latin-400-italic.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1350px;overflow:hidden;background:#000}
+.bg{position:absolute;inset:0;background:url(bg.jpg) center 30%/cover;filter:brightness(.78) saturate(.9)}
+.shade{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(10,12,20,.18),rgba(10,12,20,.55))}
+.wrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 96px;text-align:center;gap:22px}
+h1{font-family:E;font-weight:400;color:#FFFAF0;font-size:104px;line-height:1.02;letter-spacing:-.5px;text-shadow:0 2px 30px rgba(0,0,0,.35)}
+h1 i{font-style:italic}
+.lab{font-family:M;font-size:30px;letter-spacing:3px;text-transform:uppercase;background:#FFFAF0;color:#1E2E31;padding:12px 22px 10px}
+.box{font-family:G;font-size:40px;line-height:1.32;color:#1E2E31;background:rgba(255,250,240,.94);padding:14px 26px;max-width:880px}
+.box b{font-weight:600}
+.box.it{font-family:E;font-style:italic;font-size:48px;line-height:1.2}
+.step{display:flex;gap:22px;align-items:flex-start;text-align:left;background:rgba(255,250,240,.94);padding:18px 26px;width:860px}
+.step .n{font-family:M;font-size:28px;color:#3D374E;padding-top:8px}
+.step .t{font-family:G;font-size:38px;line-height:1.3;color:#1E2E31}
+.foot{position:absolute;bottom:56px;left:0;right:0;text-align:center;font-family:M;font-size:22px;letter-spacing:4px;color:rgba(255,250,240,.85)}
+.pg{position:absolute;top:56px;right:64px;font-family:M;font-size:22px;color:rgba(255,250,240,.75);letter-spacing:2px}
+.logo{width:120px;opacity:.95}
+.violet .bg{filter:brightness(.45) saturate(.7)}
+.src{font-family:M;font-size:20px;color:rgba(255,250,240,.75);letter-spacing:1px;margin-top:6px}
+</style></head><body><div class="bg"></div><div class="shade"></div><div class="wrap" id="w"></div><div class="pg" id="pg"></div><div class="foot">LUNERITUALS.APP</div>
+<script>
+const P=[
+`<h1>Why do you feel<br><i>different</i><br>every few days?</h1>`,
+`<div class="lab">What's actually happening?</div><div class="box">Ever woken up calm, and two days later<br>felt restless,</div><div class="box it">with nothing in your life changing?</div>`,
+`<div class="lab">The moon is moving</div><div class="box">Every month the moon passes through<br>all <b>12 signs</b>, about <b>2½ days</b> in each.</div><div class="box it">So the sky above you is never the same for long.</div>`,
+`<div class="lab">Each sign has a mood</div><div class="box">In astrology, the moon's sign<br>colours the mood of those days.</div><div class="box"><b>Cancer</b> days feel tender. <b>Aries</b> days feel restless. <b>Taurus</b> days ask for comfort.</div>`,
+`<div class="lab">Your own moon</div><div class="box">You also have a <b>Moon sign</b>: where the moon was when you were born. It shows how you feel and what helps you feel safe.</div><div class="box it">When the moon returns to it, your feelings come closer to the surface.</div>`,
+`<div class="lab">Your mind is part of it</div><div class="box">The brain notices what it's looking for. When you know the energy of the day, you meet it with <b>care</b> instead of blaming yourself.</div><div class="src">SELECTIVE ATTENTION · SIMONS &amp; CHABRIS, 1999</div>`,
+`<div class="lab">How to use it</div><div class="step"><span class="n">01</span><span class="t">Find your Moon sign.</span></div><div class="step"><span class="n">02</span><span class="t">Check which sign the moon is in today.</span></div><div class="step"><span class="n">03</span><span class="t">Choose one small ritual for that energy.</span></div>`,
+`<img class="logo" src="lune-logo-white.svg"><h1 style="font-size:84px">Your sky is the <i>reading.</i></h1><div class="box">Lune: Moon Rituals does steps 2 and 3 for you. It reads your sky and builds a ritual for each moon.</div><div class="lab">Join the waitlist · link in bio</div>`
+];
+function render(i){document.getElementById('w').innerHTML=P[i];document.getElementById('pg').textContent=(i+1)+'/'+P.length;document.body.className=i==P.length-1?'violet':''}
+</script></body></html>
