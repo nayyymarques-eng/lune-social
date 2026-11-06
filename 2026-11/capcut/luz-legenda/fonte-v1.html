@@ -1,0 +1,60 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:G;src:url(Geist-Regular.ttf)}
+@font-face{font-family:GM;src:url(GeistMono-Regular.ttf)}
+@font-face{font-family:EB;src:url(eb-garamond-latin-400-normal.woff2)}
+@font-face{font-family:EB;font-style:italic;src:url(eb-garamond-latin-400-italic.woff2)}
+html,body{margin:0;width:540px;height:960px;overflow:hidden;background:#0d1416}
+#bg{position:absolute;inset:0;background:
+ radial-gradient(120% 70% at 50% 30%,rgba(30,46,49,.95),rgba(30,46,49,0) 70%),
+ radial-gradient(90% 60% at 50% 100%,rgba(44,27,42,.9),rgba(44,27,42,0) 70%),#0d1416}
+canvas{position:absolute;inset:0;width:540px;height:960px}
+#lab{position:absolute;top:120px;left:0;right:0;text-align:center;font:15px GM;letter-spacing:.28em;color:#8FB8F2;opacity:.85}
+#cap{position:absolute;left:24px;right:24px;top:600px;text-align:center;font:44px/1.18 EB;color:#FFFAF0}
+#cap span{display:inline-block;white-space:pre}
+#cap i{font-style:italic;color:#cfe0fb}
+#sig{position:absolute;bottom:92px;left:0;right:0;text-align:center;font:13px G;letter-spacing:.06em;color:rgba(255,250,240,.55)}
+</style></head><body>
+<div id="bg"></div><canvas id="c"></canvas>
+<div id="lab">NEW MOON · NOV 9</div>
+<div id="cap"></div><div id="sig"></div>
+<script src="lights.js"></script><script src="lune-light.js"></script>
+<script>
+const LL=LuneLight.create(document.getElementById('c'));
+// [start, end, html words] ; *word* = italic
+const L=[
+ [0.4,3.3,"If you've been / feeling stuck…"],
+ [3.5,6.3,"maybe this is / your *sign*."],
+ [6.5,9.6,"Tonight the sky / begins again, / and so can you."],
+ [9.8,12.9,"Name one thing / you're ready / to leave behind."],
+ [13.1,16.2,"And one small thing / you'll *begin* instead."],
+ [16.4,19.4,"The change doesn't / have to happen tonight."],
+ [19.6,23.6,"Just *begin again*. ☾"]];
+const T=24;
+const cl=x=>x<0?0:x>1?1:x,eo=x=>1-Math.pow(1-x,3);
+const cap=document.getElementById('cap');let cur=-1;
+function words(s){return s.replace(/\*([^*]+)\*/g,(m,w)=>w.split(' ').map(x=>'\u0001'+x).join(' ')).split(' ')}
+function setLine(k){cur=k;cap.innerHTML='';if(k<0)return;
+ words(L[k][2]).forEach((w,i,a)=>{if(w=='/'){cap.appendChild(document.createElement('br'));return}const s=document.createElement('span');const it=w[0]=='\u0001';s.innerHTML=(it?'<i>'+w.slice(1)+'</i>':w)+(i<a.length-1?' ':'');cap.appendChild(s)})}
+// dust: fixed random points
+const D=[...Array(90)].map((_,i)=>{const h=k=>{const s=Math.sin(i*127.1+k*311.7)*43758.5453;return s-Math.floor(s)};return[h(1)*540,h(2)*960,h(3),h(4)]});
+function render(t){
+ // loop fade at ends
+ const fade=cl(t/0.6)*cl((T-t)/0.6);
+ document.body.style.opacity=1;
+ LL.begin();
+ for(const[x,y,a,p]of D){const tw=.5+.5*Math.sin(t*(.6+a)+p*6.28);LL.dot(x,y-t*2*(a+.2),.6+a*.9,[255,250,242],(.08+.32*tw*a)*fade)}
+ const ph=.035+.11*eo(cl(t/T)); // thin crescent slowly growing: the sky beginning again
+ LL.light(270,340,330,'moon',t,[255,250,242],{phase:ph,alpha:fade*1.15});
+ LL.light(270,340,330,'moon',t,[143,184,242],{phase:ph,alpha:.18*fade});
+ LL.end();
+ let k=L.findIndex(l=>t>=l[0]-.05&&t<l[1]+.35);if(k!==cur)setLine(k);
+ if(k>=0){const[s,e]=L[k],sp=[...cap.children],n=sp.length,per=Math.min(.14,.9/n);
+  const out=cl((t-e)/.35);
+  sp.forEach((el,i)=>{const a=eo(cl((t-s-i*per)/.4));el.style.opacity=(a*(1-out)).toFixed(3);
+   el.style.filter=`blur(${((1-a)*6+out*4).toFixed(2)}px)`;el.style.transform=`translateY(${((1-a)*8).toFixed(1)}px)`})}
+ document.getElementById('lab').style.opacity=(.85*fade).toFixed(3);
+ const sg=document.getElementById('sig');sg.textContent='';sg.style.opacity=(cl((t-20.2)/.8)*fade*.9).toFixed(3);
+}
+render(0);
+</script></body></html>
