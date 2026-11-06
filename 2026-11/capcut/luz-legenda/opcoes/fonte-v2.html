@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:G;src:url(Geist-Regular.ttf)}
+@font-face{font-family:GM;src:url(GeistMono-Regular.ttf)}
+@font-face{font-family:EB;src:url(eb-garamond-latin-400-normal.woff2)}
+@font-face{font-family:EB;font-style:italic;src:url(eb-garamond-latin-400-italic.woff2)}
+html,body{margin:0;width:540px;height:960px;overflow:hidden;background:#05080a}
+#bg{position:absolute;inset:0}
+canvas{position:absolute;inset:0;width:540px;height:960px}
+#lab{position:absolute;left:0;right:0;text-align:center;font:14px GM;letter-spacing:.28em;color:#8FB8F2}
+#txt{position:absolute;left:40px;right:40px;text-align:center;font:31px/1.3 EB;color:#FFFAF0;text-shadow:0 0 18px rgba(5,8,10,.9)}
+#txt i{color:#cfe0fb}
+#txt p{margin:0 0 14px}
+</style></head><body>
+<div id="bg"></div><canvas id="c"></canvas>
+<div id="lab">NEW MOON · NOV 9</div>
+<div id="txt">
+<p>If you've been feeling stuck,<br>maybe this is your <i>sign</i>.</p>
+<p>Tonight the sky begins again,<br>and so can you.</p>
+<p>Name one thing you're ready<br>to leave behind, and one small<br>thing you'll <i>begin</i> instead.</p>
+<p>The change doesn't have<br>to happen tonight.<br>Just <i>begin again</i>. ☾</p>
+</div>
+<script src="lights.js"></script><script src="lune-light.js"></script>
+<script>
+const O={
+ A:{seq:['moon','vortex','flame','moon'],ly:250,sz:280,ty:450,lab:118,col:[255,250,242],bg:'teal'},
+ B:{seq:['moon','ripple','jar','moon'],ly:250,sz:260,ty:450,lab:118,col:[255,250,242],bg:'plum'},
+ C:{seq:['moon','galaxy','build','moon'],ly:250,sz:420,ty:500,lab:70,col:[255,250,242],bg:'deep'},
+ D:{seq:['moon','breath','twin','moon'],ly:740,sz:300,ty:150,lab:96,col:[200,220,250],bg:'violet'},
+ E:{seq:['moon','steam','flame','galaxy','moon'],ly:250,sz:280,ty:450,lab:118,col:[255,240,226],bg:'dusk'}};
+const opt=O[new URLSearchParams(location.search).get('o')||'A'];
+const BG={teal:'radial-gradient(70% 45% at 30% 25%,rgba(30,46,49,.9),transparent 70%),radial-gradient(60% 40% at 80% 80%,rgba(44,27,42,.8),transparent 70%)',
+ plum:'radial-gradient(80% 50% at 70% 20%,rgba(44,27,42,.95),transparent 70%),radial-gradient(60% 40% at 20% 85%,rgba(30,46,49,.8),transparent 70%)',
+ deep:'radial-gradient(70% 40% at 50% 50%,rgba(61,55,78,.55),transparent 70%)',
+ violet:'radial-gradient(90% 50% at 50% 85%,rgba(61,55,78,.8),transparent 70%),radial-gradient(70% 40% at 20% 10%,rgba(30,46,49,.8),transparent 70%)',
+ dusk:'radial-gradient(80% 45% at 50% 25%,rgba(61,55,78,.7),transparent 70%),radial-gradient(70% 45% at 50% 100%,rgba(44,27,42,.9),transparent 70%)'};
+document.getElementById('bg').style.background=BG[opt.bg]+',#05080a';
+document.getElementById('lab').style.top=opt.lab+'px';document.getElementById('txt').style.top=opt.ty+'px';
+const LL=LuneLight.create(document.getElementById('c'));
+const T=21,cl=x=>x<0?0:x>1?1:x,eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const S=[...Array(260)].map((_,i)=>{const h=k=>{const s=Math.sin(i*127.1+k*311.7)*43758.5453;return s-Math.floor(s)};return[h(1)*540,h(2)*960,h(3),h(4)]});
+function render(t){
+ const fade=cl(t/0.6)*cl((T-t)/0.6);
+ LL.begin();
+ for(const[x,y,a,p]of S){const tw=.55+.45*Math.sin(t*(.5+a*1.5)+p*6.28);LL.dot((x+t*1.2*a)%540,y,.4+a*a*1.3,a>.85?[200,220,250]:[255,250,242],(.06+.5*tw*a*a)*fade)}
+ // morph timeline: hold, morph 1.6 s, hold
+ const sq=opt.seq,n=sq.length-1,seg=T/n;let i=Math.min(n-1,Math.floor(t/seg)),u=(t-i*seg)/seg;
+ const k=eio(cl((u-.55)/.4));
+ const a=sq[i],b=sq[i+1];
+ const ph=.2;
+ const o={alpha:fade*(opt.dim||1)};if(a==='moon'){o.phase=ph;o.alpha*=1.4}
+ if(k>0)o.morph={to:b,k};
+ LL.light(270,opt.ly,opt.sz,a,t,opt.col,o);
+ LL.end();
+ const tx=document.getElementById('txt');tx.style.opacity=(cl((t-.3)/.9)*fade).toFixed(3);
+ document.getElementById('lab').style.opacity=(.85*fade).toFixed(3);
+}
+render(0);
+</script></body></html>
