@@ -1,0 +1,48 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+html,body{margin:0;width:540px;height:960px;overflow:hidden;background:#000}
+canvas{position:absolute;inset:0;width:540px;height:960px}
+#fc{position:absolute;left:220px;top:280px;width:100px;height:100px}
+</style></head><body>
+<canvas id="sky" data-float></canvas><canvas id="skygl"></canvas><div id="fc" data-float-center></div><canvas id="moon"></canvas>
+<script>(()=>{let s=12345;Math.random=()=>(s=(s*16807)%2147483647)/2147483647})();</script>
+<script src="lights.js"></script><script src="lune-light.js"></script><script src="sky.js"></script>
+<script>
+const P=new URLSearchParams(location.search);
+const N=1400,R=175,CX=270,CY=330,T=+(P.get('T')||18);
+const SEQ=(P.get('seq')||'sphere,galaxy,rings,torus,crescent,wave,sphere').split(',');
+const h=(i,k)=>{const s=Math.sin(i*127.1+k*311.7)*43758.5453;return s-Math.floor(s)};
+const cl=x=>x<0?0:x>1?1:x,eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,GA=2.399963;
+// each form: N points [x,y,z] in a unit-ish space, generated in an order that keeps neighbours close
+const F={
+ sphere:i=>{const y=1-2*(i+.5)/N,r=Math.sqrt(1-y*y),g=i*GA;return[r*Math.cos(g),y,r*Math.sin(g)]},
+ galaxy:i=>{const u=(i+.5)/N,arm=i%2,rr=.08+1.05*Math.pow(u,.8),a=arm*Math.PI+rr*4.2+(h(i,1)-.5)*.5*(1-u*.4),
+   sp=(h(i,2)-.5)*.16*rr;return[(rr+sp)*Math.cos(a),(h(i,3)-.5)*.06,(rr+sp)*Math.sin(a)]},
+ rings:i=>{const ring=i%3,u=(i/3)/(N/3)*Math.PI*2,r=[.55,.85,1.12][ring],w=(h(i,4)-.5)*.05;return[(r+w)*Math.cos(u),(h(i,5)-.5)*.04+[.0,0,0][ring],(r+w)*Math.sin(u)]},
+ heart:i=>{const u=(i+.5)/N*Math.PI*2,x=16*Math.pow(Math.sin(u),3)/16,y=-(13*Math.cos(u)-5*Math.cos(2*u)-2*Math.cos(3*u)-Math.cos(4*u))/16,f=Math.sqrt(h(i,6));return[x*f*1.05,y*f*1.05,(h(i,7)-.5)*.25]},
+ crescent:i=>{let k=0,x,y;do{const a=h(i,11+k)*Math.PI*2,r=Math.sqrt(h(i,21+k));x=r*Math.cos(a);y=r*Math.sin(a);k++}while(Math.hypot(x+.42,y)<.82&&k<40);return[x*1.1,y*1.1,(h(i,7)-.5)*.12]},
+ torus:i=>{const u=(i*GA)%(Math.PI*2),v=(i+.5)/N*Math.PI*2*23,R0=.78,r0=.3;return[(R0+r0*Math.cos(v))*Math.cos(u),r0*Math.sin(v),(R0+r0*Math.cos(v))*Math.sin(u)]},
+ wave:i=>{const u=(i+.5)/N,x=(u*2-1)*1.25,w=(h(i,12)-.5)*.18;return[x,Math.sin(u*Math.PI*3)*.35+w,(h(i,13)-.5)*.3]},
+};
+// tilts per form (radians): sphere seen straight, discs tilted toward us
+const TILT={sphere:.28,galaxy:1.1,rings:1.15,heart:0,crescent:0,torus:.9,wave:.2};
+const SPIN={sphere:.12,galaxy:.25,rings:.2,heart:0,crescent:0,torus:.3,wave:.15};
+function pos(form,i,t){let[x,y,z]=F[form](i);const a=t*SPIN[form]+.4,c=Math.cos(a),s=Math.sin(a);
+ if(SPIN[form]){[x,z]=[x*c+z*s,-x*s+z*c]}const tl=TILT[form],ct=Math.cos(tl),st=Math.sin(tl);return[x,y*ct-z*st,y*st+z*ct]}
+const LL=LuneLight.create(document.getElementById('moon'));
+function render(t){
+ window.skyFrame(t*1000);
+ const n=SEQ.length-1,seg=T/n,si=Math.min(n-1,Math.floor(t/seg)),u=(t-si*seg)/seg;
+ const K=cl((u-.42)/.55),fade=cl(t/.4)*cl((T-t)/.4),A=SEQ[si],B=SEQ[si+1];
+ LL.begin();
+ for(let i=0;i<N;i++){
+  const ki=eio(cl((K-.2*h(i,8))/.8)),p=pos(A,i,t),q=pos(B,i,t),sw=Math.sin(Math.PI*ki)*.22;
+  let x=p[0]+(q[0]-p[0])*ki,y=p[1]+(q[1]-p[1])*ki,z=p[2]+(q[2]-p[2])*ki;
+  const cs=Math.cos(sw),sn=Math.sin(sw);[x,z]=[x*cs-z*sn,x*sn+z*cs]; // a little swirl while moving
+  const dep=cl((z+1.2)/2.4),tw=.78+.22*Math.sin(t*(.9+1.6*h(i,5))+i*1.7);
+  const star=h(i,3)<.03;
+  LL.dot(CX+x*R,CY+y*R,(star?2.2:1.0+.5*h(i,9))*(.75+.4*dep),[255,250,242],(.28+.72*dep)*tw*fade);
+ }
+ LL.end();
+}
+</script></body></html>
