@@ -1,0 +1,161 @@
+
+(() => {
+  const glc=document.getElementById('skygl'), cv=document.getElementById('sky');
+  if (!cv || cv.tagName !== 'CANVAS') return;
+  let GL = null;
+  const ctx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rnd = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(7);
+  const TEMP = ['200 215 255', '225 232 255', '255 255 255', '255 244 228', '255 226 190', '255 205 165'];
+  let W, H, D, S, layer, stars = [], bright = [], shoot = null, nextShoot = 4000, vis = true;
+  // Floating: points in a cone ahead of us; z falls from 1 to ~0.05 as we drift towards them, so they spread out from the centre.
+  const floating = cv.hasAttribute('data-float'), FLY = 260, SPEED = .035; // SPEED: depth per second (a star lives ~27 s)
+  const flyers = floating ? Array.from({ length: FLY }, () => ({ x: rnd() * 2 - 1, y: rnd() * 2 - 1, z: .05 + rnd() * .95,
+    r: .5 + Math.pow(rnd(), 3) * 1.4, c: TEMP[(rnd() * TEMP.length) | 0].split(' ').map(Number) })) : [];
+  let lastFly = 0;
+  function floatCenter() {
+    const el = cv.parentElement.querySelector('[data-float-center]'), cr = cv.getBoundingClientRect();
+    if (!el) return [W / 2, H / 2];
+    const r = el.getBoundingClientRect();
+    return [r.left - cr.left + r.width / 2, r.top - cr.top + r.height * .38]; // .38: the moon in the logo, above the letters
+  }
+  function fly(ms, fr) {
+    const dt = reduce ? 0 : Math.min(.1, (ms - lastFly) / 1000); lastFly = ms;
+    const [cx, cy] = floatCenter(), spread = Math.max(W, H) * .5;
+    for (const f of flyers) {
+      f.z -= SPEED * dt;
+      if (f.z < .05) { f.x = rnd() * 2 - 1; f.y = rnd() * 2 - 1; f.z = 1; }
+      const x = cx + f.x * spread * .25 / f.z, y = cy + f.y * spread * .25 / f.z;
+      if (x < -9 || y < -9 || x > W + 9 || y > H + 9 || hidden(fr, x, y)) continue;
+      const near = 1 - f.z, a = Math.min(1, near * 2.2) * Math.min(1, f.z * 8); // fade in from far, out just before passing
+      GL.dot(x, y, f.r * (.45 + near * 1.3), f.c, .9 * a);
+    }
+  }
+
+  function build() {
+    const dpr = Math.min(devicePixelRatio || 1, 1.5);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    D = Math.ceil(Math.hypot(W, H) * 1.15); S = dpr;
+    layer = document.createElement('canvas'); layer.width = D * S; layer.height = D * S;
+    const g = layer.getContext('2d'); g.scale(S, S);
+    // Milky Way band: a diagonal through the centre
+    const ang = -0.5, cx = D / 2, cy = D / 2, ux = Math.cos(ang), uy = Math.sin(ang);
+    const band = (t, off) => [cx + ux * t - uy * off, cy + uy * t + ux * off];
+    const k = D / 1950, area0 = D * D / 1e6;
+    g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 68 * area0; i++) {
+      const t = (rnd() - .5) * D, off = (rnd() + rnd() + rnd() - 1.5) * D * .07;
+      const [x, y] = band(t, off), r = (30 + rnd() * 120) * Math.max(k, .6);
+      const c = rnd() < .5 ? '179 166 242' : rnd() < .6 ? '255 236 214' : '143 184 242';
+      const gr = g.createRadialGradient(x, y, 0, x, y, r);
+      gr.addColorStop(0, `rgb(${c} / ${.025 + rnd() * .035})`); gr.addColorStop(1, `rgb(${c} / 0)`);
+      g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    g.globalCompositeOperation = 'source-over';
+    // dust lanes
+    for (let i = 0; i < 18 * area0; i++) {
+      const t = (rnd() - .5) * D, off = (rnd() - .5) * D * .03;
+      const [x, y] = band(t, off), r = (20 + rnd() * 60) * Math.max(k, .6);
+      const gr = g.createRadialGradient(x, y, 0, x, y, r);
+      gr.addColorStop(0, 'rgb(0 0 0 / .35)'); gr.addColorStop(1, 'rgb(0 0 0 / 0)');
+      g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    // faint stars, denser along the band
+    const area = D * D / 1e6;
+    stars = [];
+    for (let i = 0; i < 1700 * area; i++) {
+      let x, y;
+      if (rnd() < .45) { const t = (rnd() - .5) * D, off = (rnd() + rnd() - 1) * D * .09; [x, y] = band(t, off); }
+      else { x = rnd() * D; y = rnd() * D; }
+      const m = Math.pow(rnd(), 3.2), r = .25 + m * .9, a = .18 + m * .7;
+      stars.push({ x, y, r, a, c: TEMP[(rnd() * TEMP.length) | 0].split(' ').map(Number) });
+    }
+    // bright stars, drawn live so they twinkle
+    bright = [];
+    for (let i = 0; i < 170 * area; i++) bright.push({ x: rnd() * D, y: rnd() * D, r: .7 + Math.pow(rnd(), 4) * 1.6,
+      c: TEMP[(rnd() * TEMP.length) | 0], p: rnd() * 6.28, f: .6 + rnd() * 1.8 });
+    bright.forEach((b) => (b.rgb = b.c.split(' ').map(Number)));
+  }
+
+  // Glass cards in this section frost what is behind them. Done here because backdrop-filter does not reach these canvases.
+  // A large panel marked data-solid skips the blur (too costly every frame): it is tinted in CSS and simply hides the stars behind it.
+  function frostRects() {
+    const cr = cv.getBoundingClientRect();
+    return [...cv.parentElement.querySelectorAll('.glass')].map((e) => [e.getBoundingClientRect(), e.hasAttribute('data-solid')])
+      .filter(([r]) => r.width > 200 && r.height > 120).map(([r, solid]) => ({ x: r.left - cr.left, y: r.top - cr.top, w: r.width, h: r.height, solid }));
+  }
+  const hit = (r, x, y) => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h;
+  const inside = (fr, x, y) => fr.some((r) => !r.solid && hit(r, x, y));
+  const hidden = (fr, x, y) => fr.some((r) => r.solid && hit(r, x, y));
+  let tmp = null;
+  function frost(all) {
+    const fr = all.filter((r) => !r.solid);
+    if (!fr.length || !('filter' in ctx)) return;
+    tmp = tmp || document.createElement('canvas');
+    tmp.width = cv.width; tmp.height = cv.height; tmp.getContext('2d').drawImage(cv, 0, 0);
+    for (const r of fr) {
+      ctx.save(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(r.x, r.y, r.w, r.h, 16) : ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+      ctx.clearRect(r.x, r.y, r.w, r.h); ctx.filter = 'blur(18px)'; ctx.drawImage(tmp, 0, 0, W, H); ctx.restore();
+    }
+  }
+
+  function points(ms, rot, fr) {
+    if (!GL && window.LuneLight) GL = LuneLight.create(glc);
+    if (!GL) { // no WebGL: paint the stars flat
+      ctx.save(); ctx.translate(W / 2, H * .35); ctx.rotate(rot); ctx.translate(-D / 2, -D / 2);
+      for (const s of stars) { ctx.fillStyle = `rgb(${s.c.join(' ')} / ${s.a})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill(); }
+      ctx.restore(); return;
+    }
+    const c = Math.cos(rot), sn = Math.sin(rot), ox = W / 2, oy = H * .35, h = D / 2;
+    const at = (x, y) => [ox + c * (x - h) - sn * (y - h), oy + sn * (x - h) + c * (y - h)];
+    GL.begin();
+    for (const s of stars) { const [x, y] = at(s.x, s.y); if (x < -4 || y < -4 || x > W + 4 || y > H + 4 || hidden(fr, x, y)) continue; if (inside(fr, x, y)) { if (s.r > .6) GL.dot(x, y, 2.4 + s.r * 2, s.c, s.a * .12); continue; } GL.dot(x, y, .35 + s.r * .55, s.c, s.a); }
+    for (const s of bright) { const [x, y] = at(s.x, s.y); if (x < -9 || y < -9 || x > W + 9 || y > H + 9 || hidden(fr, x, y)) continue;
+      const tw = reduce ? .85 : .55 + .45 * Math.sin(ms / 1000 * s.f + s.p) * Math.sin(ms / 1700 * s.f + s.p * 2);
+      if (inside(fr, x, y)) { GL.dot(x, y, 3 + s.r * 3, s.rgb, .12 * tw); continue; }
+      GL.dot(x, y, s.r * .9, s.rgb, Math.max(.15, tw)); }
+    if (floating) fly(ms, fr);
+    GL.end();
+  }
+
+  // The Milky Way turns about 1 degree every 8 seconds, so the heavy 2D layer is only repainted twice a second
+  // (or every frame while a shooting star crosses); the twinkling points on the WebGL layer run every frame.
+  let lastRot = -1, wasShoot = false;
+  function frame(ms) {
+    const rot = reduce ? 0 : Math.floor(ms / 500) * 0.5 * 0.0022;
+    const fr = frostRects();
+    if (rot === lastRot && !shoot && !wasShoot && ms > 0) { points(ms, rot, fr); return; }
+    lastRot = rot; wasShoot = !!shoot;
+    ctx.clearRect(0, 0, W, H);
+    ctx.save(); ctx.translate(W / 2, H * .35); ctx.rotate(rot); ctx.translate(-D / 2, -D / 2);
+    ctx.drawImage(layer, 0, 0, D, D);
+    for (const s of bright) {
+      const tw = .8;
+      if (s.r > 1.5) { const L = s.r * 7 * tw; ctx.strokeStyle = `rgb(${s.c} / ${tw * .45})`; ctx.lineWidth = .6;
+        ctx.beginPath(); ctx.moveTo(s.x - L, s.y); ctx.lineTo(s.x + L, s.y); ctx.moveTo(s.x, s.y - L); ctx.lineTo(s.x, s.y + L); ctx.stroke(); }
+    }
+    ctx.restore();
+    frost(fr);
+    points(ms, rot, fr);
+    if (!reduce) {
+      if (!shoot && ms > nextShoot) { const a = .5 + Math.random() * .5; shoot = { x: W * (.2 + Math.random() * .6), y: H * Math.random() * .3, vx: Math.cos(a) * 900, vy: Math.sin(a) * 900, t0: ms }; }
+      if (shoot) {
+        const k = (ms - shoot.t0) / 1000, x = shoot.x + shoot.vx * k, y = shoot.y + shoot.vy * k, life = 1 - k / .9;
+        if (life <= 0) { shoot = null; nextShoot = ms + 7000 + Math.random() * 9000; }
+        else { const gr = ctx.createLinearGradient(x, y, x - shoot.vx * .12, y - shoot.vy * .12);
+          gr.addColorStop(0, `rgb(255 255 255 / ${.8 * life})`); gr.addColorStop(1, 'rgb(255 255 255 / 0)');
+          ctx.strokeStyle = gr; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - shoot.vx * .12, y - shoot.vy * .12); ctx.stroke(); }
+      }
+    }
+  }
+
+  let last = 0;
+  function loop(ms) { if (vis && ms - last > 32) { frame(ms); last = ms; } requestAnimationFrame(loop); }
+  build(); frame(0); 
+  let rt = 0;
+  const rebuild = () => { clearTimeout(rt); rt = setTimeout(() => { if (Math.abs(cv.clientHeight - H) > 2 || Math.abs(cv.clientWidth - W) > 2) { build(); lastRot = -1; frame(performance.now()); } }, 120); };
+  if ('ResizeObserver' in window) new ResizeObserver(rebuild).observe(cv); else addEventListener('resize', rebuild);
+  if ('IntersectionObserver' in window) new IntersectionObserver(e => { vis = e[0].isIntersecting; }).observe(cv);
+  window.skyFrame=frame;
+})();
